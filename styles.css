@@ -1,0 +1,281 @@
+html, body {
+    height: 100%;
+}
+
+/* Custom CSS to adjust layout */
+#playlist {
+    background-color: #f8f9fa;
+    padding: 15px;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding-top: 0;
+}
+
+#videoPlayer {
+    width: 100%;
+    height: auto;
+}
+
+.input-group-btn {
+    display: flex;
+    align-items: center;
+}
+
+.btn-go {
+    margin-left: 10px;
+}
+
+.tv-logo {
+    width: 100px;
+}
+
+/* 频道列表项样式 */
+.channel {
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 5px;
+}
+
+.channel:hover {
+    background-color: #e9ecef;
+    transform: translateX(5px);
+    cursor: pointer;
+}
+
+/* CSS for the billed message */
+.billed-msg {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+/* Search bar styles */
+.search-bar {
+    margin-bottom: 10px;
+}
+
+#recentPlayedList {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    border-radius: 15px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #6c757d transparent;
+}
+
+#recentPlayedList::-webkit-scrollbar {
+    height: 6px;
+}
+
+#recentPlayedList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#recentPlayedList::-webkit-scrollbar-thumb {
+    background-color: #6c757d;
+    border-radius: 3px;
+}
+
+/* 分类标题样式优化 */
+.category-header {
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 8px;
+}
+
+.category-header:hover {
+    background-color: #e9ecef;
+}
+
+.category-icon {
+    transition: transform 0.3s;
+}
+
+/* 频道容器样式 */
+.channels-container {
+    padding-left: 1rem;
+    padding-top: 5px;
+}
+
+.category-title {
+    font-weight: 500;
+    flex-grow: 1;
+}
+
+/* 动画效果 */
+.collapse {
+    transition: height 0.3s ease;
+}
+
+/* 搜索时的样式 */
+.category-container.filtered .channels-container {
+    display: block !important;
+}
+
+/* Recent played styles */
+.recent-channel {
+    width: 150px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.recent-channel:hover {
+    transform: translateY(-5px);
+}
+
+.recent-channel-image {
+    width: 150px;
+    height: 100px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recent-channel-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recent-channel-image i {
+    color: #6c757d;
+}
+
+.recent-channel-title {
+    font-size: 0.9rem;
+    margin-top: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #495057;
+}
+
+/* 最近播放的标题样式 */
+#recentPlayedSection > div:first-child {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+/* Logo 和标题样式 */
+.header-content {
+    display: flex;
+    align-items: center;
+    padding: 15px 15px 10px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.app-logo {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.app-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #495057;
+    margin: 0;
+}
+
+/* 搜索栏固定样式 */
+.search-container {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    padding: 15px 15px 5px;
+    z-index: 1000;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* 视频信息样式 */
+.video-info {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.video-title {
+    font-size: 1.2rem;
+    margin: 0;
+    color: #495057;
+}
+
+.video-category {
+    margin-top: 5px;
+}
+
+.video-category .badge {
+    font-weight: normal;
+    font-size: 0.9rem;
+}
+
+/* 移动端菜单按钮样式 */
+.menu-toggle {
+    display: none;
+    z-index: 1100;
+    background: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+}
+
+/* 移动端侧边栏样式 */
+@media (max-width: 767.98px) {
+    .menu-toggle {
+        display: block;
+        margin-right: 15px;
+    }
+
+    #playlist {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        bottom: 0;
+        width: 80%;
+        z-index: 1050;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        padding-top: 0;
+    }
+
+    #playlist.show {
+        left: 0;
+    }
+
+    /* 遮罩层 */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1040;
+    }
+
+    .sidebar-overlay.show {
+        display: block;
+    }
+
+    /* 调整主内容区域 */
+    .col-md-10 {
+        width: 100%;
+        padding: 0 15px;
+    }
+} 
