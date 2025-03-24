@@ -38,18 +38,57 @@
             loadM3UButton.addEventListener("click", async () => {
                 try {
                     loadM3UButton.disabled = true;
-                    loadM3UButton.textContent = 'Loading...';
+                    const loadingProgress = document.getElementById('loadingProgress');
+                    const progressBar = loadingProgress.querySelector('.progress-bar');
+                    loadingProgress.classList.remove('d-none');
+                    progressBar.style.width = '0%';
+                    progressBar.textContent = 'Connecting...';
                     
                     const m3uURL = m3uURLInput.value;
                     localStorage.setItem("m3uPlaylistURL", m3uURL);
 
-                    // 使用 async/await 替换 Promise 链
+                    // 使用 fetch 并监听进度
                     const response = await fetch(m3uURL);
-                    const data = await response.text();
+                    const reader = response.body.getReader();
+                    const contentLength = +response.headers.get('Content-Length');
+
+                    let receivedLength = 0;
+                    let chunks = [];
+                    while(true) {
+                        const {done, value} = await reader.read();
+                        
+                        if (done) break;
+                        
+                        chunks.push(value);
+                        receivedLength += value.length;
+                        
+                        // 计算进度
+                        const progress = contentLength ? 
+                            Math.round((receivedLength / contentLength) * 100) : 
+                            'Loading...';
+                        
+                        progressBar.style.width = `${progress}%`;
+                        loadingProgress.querySelector('.progress-text').textContent = 
+                            typeof progress === 'number' ? `${progress}%` : progress;
+                    }
+
+                    // 合并数据
+                    const chunksAll = new Uint8Array(receivedLength);
+                    let position = 0;
+                    for(let chunk of chunks) {
+                        chunksAll.set(chunk, position);
+                        position += chunk.length;
+                    }
+                    
+                    // 转换为文本
+                    const data = new TextDecoder("utf-8").decode(chunksAll);
                     
                     // 清除现有内容
                     videoPlayer.innerHTML = '';
                     clearPlaylist();
+
+                    progressBar.style.width = '100%';
+                    loadingProgress.querySelector('.progress-text').textContent = 'Processing playlist...';
 
                     // 解析和渲染新的播放列表
                     const parsedPlaylist = parseM3U(data);
@@ -78,7 +117,7 @@
                     // 显示错误信息给用户
                     const errorMsg = document.createElement('div');
                     errorMsg.className = 'alert alert-danger';
-                    errorMsg.textContent = `加载失败: ${error.message}`;
+                    errorMsg.textContent = `Loading failed: ${error.message}`;
                     playlistItemsContainer.prepend(errorMsg);
                     
                     // 3秒后移除错误信息
@@ -86,6 +125,7 @@
                 } finally {
                     loadM3UButton.disabled = false;
                     loadM3UButton.textContent = 'Go';
+                    loadingProgress.classList.add('d-none');
                 }
             });
 
@@ -129,7 +169,7 @@
                         icon.classList.add('fa-chevron-down');
                     });
                 } else {
-                    channelPlaceholder.textContent = "No channels found";
+                    channelPlaceholder.textContent = "No channel found";
                     channelPlaceholder.classList.remove("d-none");
                 }
             });

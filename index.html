@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Streaming App</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -10,14 +11,16 @@
 <body>
     <div class="sidebar-overlay"></div>
 
+    <!-- 移动端菜单按钮 -->
+    <button class="menu-toggle btn d-md-none">
+        <i class="fas fa-bars"></i>
+    </button>
+
     <div class="container-fluid h-100">
         <div class="row d-flex justify-content-center h-100">
             <div class="col-md-2 order-md-1" id="playlist">
-                <button class="menu-toggle btn">
-                    <i class="fas fa-bars"></i>
-                </button>
                 <div class="header-content">
-                    <img src="https://afzafri.github.io/IPTV-Player-Web-App/favicon.png" alt="App Logo" class="app-logo">
+                    <img src="logo.png" alt="App Logo" class="app-logo">
                     <h1 class="app-title">IPTV Player</h1>
                 </div>
                 <div class="search-container">
@@ -35,6 +38,13 @@
                             <input type="text" id="m3uURL" class="form-control" placeholder="Enter M3U URL">
                             <div class="input-group-btn">
                                 <button id="loadM3U" class="btn btn-primary btn-go">Go</button>
+                            </div>
+                        </div>
+                        <div id="loadingProgress" class="progress mb-3 d-none">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                role="progressbar" style="width: 100%"></div>
+                            <div class="progress-text">
+                                Loading playlist...
                             </div>
                         </div>
                     </div>
