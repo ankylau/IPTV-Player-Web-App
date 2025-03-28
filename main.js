@@ -39,6 +39,7 @@
             const urlParam = urlParams.get('url');
             
             if (urlParam) {
+                document.getElementById('welcomeSection').classList.add('d-none');
                 const decodedUrl = decodeURIComponent(urlParam);
                 m3uURLInput.value = decodedUrl;
                 setTimeout(() => loadM3UButton.click(), 500);
@@ -46,6 +47,7 @@
                 // 从localStorage加载上次的URL
                 const savedPlaylistURL = localStorage.getItem("m3uPlaylistURL");
                 if (savedPlaylistURL) {
+                    document.getElementById('welcomeSection').classList.add('d-none');
                     m3uURLInput.value = savedPlaylistURL;
                     setTimeout(() => loadM3UButton.click(), 500);
                 }
@@ -86,6 +88,9 @@
                 try {
                     loadM3UButton.disabled = true;
                     const m3uURL = m3uURLInput.value;
+                    
+                    // 隐藏欢迎区块
+                    document.getElementById('welcomeSection').classList.add('d-none');
                     
                     // 添加判断URL是否为M3U8链接的逻辑
                     if (m3uURL.toLowerCase().endsWith('.m3u8')) {
@@ -193,6 +198,8 @@
                     }
 
                 } catch (error) {
+                    // 如果加载失败，显示欢迎区块
+                    document.getElementById('welcomeSection').classList.remove('d-none');
                     console.error("Error loading the M3U file:", error);
                     // 显示错误信息给用户
                     const errorMsg = document.createElement('div');
