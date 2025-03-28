@@ -16,43 +16,21 @@
             const recentPlayedSection = document.getElementById("recentPlayedSection");
             const recentPlayedList = document.getElementById("recentPlayedList");
 
-            // 获取URL参数并处理
+            // 修改URL参数处理逻辑
             const urlParams = new URLSearchParams(window.location.search);
-            const m3u8Param = urlParams.get('m3u8');
-            const m3uParam = urlParams.get('m3u');
+            const urlParam = urlParams.get('url');
             
-            if (m3u8Param) {
-                // 如果有m3u8参数，直接设置到输入框并播放
-                m3uURLInput.value = decodeURIComponent(m3u8Param);
-                setTimeout(() => loadM3UButton.click(), 500);
-            } else if (m3uParam) {
-                // 如果有m3u参数，设置到输入框并解析播放列表
-                m3uURLInput.value = decodeURIComponent(m3uParam);
+            if (urlParam) {
+                const decodedUrl = decodeURIComponent(urlParam);
+                m3uURLInput.value = decodedUrl;
                 setTimeout(() => loadM3UButton.click(), 500);
             } else {
-                // 保持原有的playlist参数处理逻辑
-                const playlistParam = urlParams.get('playlist');
-                if (playlistParam) {
-                    m3uURLInput.value = decodeURIComponent(playlistParam);
+                // 从localStorage加载上次的URL
+                const savedPlaylistURL = localStorage.getItem("m3uPlaylistURL");
+                if (savedPlaylistURL) {
+                    m3uURLInput.value = savedPlaylistURL;
                     setTimeout(() => loadM3UButton.click(), 500);
-                } else {
-                    // 从localStorage加载上次的URL
-                    const savedPlaylistURL = localStorage.getItem("m3uPlaylistURL");
-                    if (savedPlaylistURL) {
-                        m3uURLInput.value = savedPlaylistURL;
-                        setTimeout(() => loadM3UButton.click(), 500);
-                    }
                 }
-            }
-
-            // Load search input from local storage
-            const savedPlaylistURL = localStorage.getItem("m3uPlaylistURL");
-            if (savedPlaylistURL) {
-                m3uURLInput.value = savedPlaylistURL;
-                // Automatically load the saved playlist
-                setTimeout(function() {
-                    loadM3UButton.click();
-                }, 500);
             }
 
             // Load recent played
