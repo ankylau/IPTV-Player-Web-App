@@ -1,6 +1,7 @@
         // Define an array to store all playlist items
         let playlistItems = [];
-        let player = null;
+        let player;
+        let hls;
         let recentPlayed = [];
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -34,6 +35,47 @@
 
             // Load recent played
             loadRecentPlayed();
+
+            // 初始化 Plyr 播放器
+            player = new Plyr(videoPlayer, {
+                controls: [
+                    'play-large',
+                    'play',
+                    'progress',
+                    'current-time',
+                    'mute',
+                    'volume',
+                    'fullscreen'
+                ],
+                fullscreen: {
+                    enabled: true,
+                    fallback: true,
+                    iosNative: true
+                },
+                // 添加直播标志
+                markers: {
+                    enabled: true,
+                    points: [{
+                        time: 0,
+                        label: 'LIVE',
+                        class: 'plyr__live-badge'
+                    }]
+                }
+            });
+
+
+            // 创建 HLS 实例
+            if (Hls.isSupported()) {
+                hls = new Hls({
+                    maxBufferLength: 30,
+                    maxMaxBufferLength: 60
+                });
+            }
+
+            // 初始状态隐藏播放器和播放器容器
+            videoPlayer.style.display = 'none';
+            document.getElementById('videoInfo').classList.add('d-none');
+            document.querySelector('.player-container').classList.add('d-none');
 
             loadM3UButton.addEventListener("click", async () => {
                 try {
@@ -84,7 +126,7 @@
                     const data = new TextDecoder("utf-8").decode(chunksAll);
                     
                     // 清除现有内容
-                    videoPlayer.innerHTML = '';
+                    // videoPlayer.innerHTML = '';
                     clearPlaylist();
 
                     progressBar.style.width = '100%';
@@ -210,72 +252,7 @@
                     channelItem.addEventListener("click", async () => {
                         clearErrorMessage();
                         try {
-                            if (player !== null) {
-                                await player.destroy();
-                            }
-
-                            player = new shaka.Player(videoPlayer);
-
-                            // Add error event listener
-                            player.addEventListener('error', onPlayerError);
-
-                            // Configure network filters
-                            player.getNetworkingEngine().registerRequestFilter(function(type, request) {
-                                console.log('Outgoing request:', type, request);
-                            });
-
-                            player.getNetworkingEngine().registerResponseFilter(function(type, response) {
-                                console.log('Incoming response:', type, response);
-                            });
-
-                            if (item.key) {
-                                console.log('Key information:', item.key);
-                                if (item.key.license_type === 'clearkey' && item.key.license_key) {
-                                    console.log('Configuring for URL-based license key');
-                                    player.configure({
-                                        drm: {
-                                            servers: {
-                                                'org.w3.clearkey': item.key.license_key
-                                            }
-                                        }
-                                    });
-                                } else if (item.key.key_id && item.key.key) {
-                                    console.log('Configuring for direct key values');
-                                    player.configure({
-                                        drm: {
-                                            clearKeys: {
-                                                [item.key.key_id]: item.key.key
-                                            }
-                                        }
-                                    });
-                                } else if (item.key.raw_key) {
-                                    console.log('Configuring for raw key');
-                                    // You might need to adjust this based on how your raw key should be used
-                                    player.configure({
-                                        drm: {
-                                            clearKeys: item.key.raw_key
-                                        }
-                                    });
-                                }
-                            }
-
-                            console.log('Loading source:', item.source);
-                            await player.load(item.source);
-                            console.log('Source loaded successfully');
-
-                            // 显示视频信息
-                            const videoInfo = document.getElementById('videoInfo');
-                            const videoTitle = videoInfo.querySelector('.video-title');
-                            const videoCategory = videoInfo.querySelector('.video-category .badge');
-                            
-                            videoTitle.textContent = item.tvgName;
-                            videoCategory.textContent = item.groupTitle;
-                            
-                            videoInfo.classList.remove('d-none');
-                            videoPlayer.scrollIntoView({ behavior: 'smooth' });
-                            videoPlayer.classList.remove("d-none");
-
-                            saveRecentPlayed(item);
+                            await playVideo(item);
                         } catch (error) {
                             console.error('Error in renderPlaylist:', error);
                             onPlayerError(error);
@@ -316,92 +293,7 @@
                     
                     // 渲染频道列表
                     channels.forEach((item, index) => {
-                        const channelItem = document.createElement("div");
-                        channelItem.className = "channel d-flex flex-column p-3";
-                        channelItem.textContent = item.tvgName || `Stream ${index + 1}`;
-
-                        if (item.tvgLogo) {
-                            const logoImage = document.createElement("img");
-                            logoImage.src = item.tvgLogo;
-                            logoImage.className = "tv-logo";
-                            channelItem.appendChild(logoImage);
-                        }
-
-                        channelItem.addEventListener("click", async () => {
-                            clearErrorMessage();
-                            try {
-                                if (player !== null) {
-                                    await player.destroy();
-                                }
-
-                                player = new shaka.Player(videoPlayer);
-
-                                // Add error event listener
-                                player.addEventListener('error', onPlayerError);
-
-                                // Configure network filters
-                                player.getNetworkingEngine().registerRequestFilter(function(type, request) {
-                                    console.log('Outgoing request:', type, request);
-                                });
-
-                                player.getNetworkingEngine().registerResponseFilter(function(type, response) {
-                                    console.log('Incoming response:', type, response);
-                                });
-
-                                if (item.key) {
-                                    console.log('Key information:', item.key);
-                                    if (item.key.license_type === 'clearkey' && item.key.license_key) {
-                                        console.log('Configuring for URL-based license key');
-                                        player.configure({
-                                            drm: {
-                                                servers: {
-                                                    'org.w3.clearkey': item.key.license_key
-                                                }
-                                            }
-                                        });
-                                    } else if (item.key.key_id && item.key.key) {
-                                        console.log('Configuring for direct key values');
-                                        player.configure({
-                                            drm: {
-                                                clearKeys: {
-                                                    [item.key.key_id]: item.key.key
-                                                }
-                                            }
-                                        });
-                                    } else if (item.key.raw_key) {
-                                        console.log('Configuring for raw key');
-                                        // You might need to adjust this based on how your raw key should be used
-                                        player.configure({
-                                            drm: {
-                                                clearKeys: item.key.raw_key
-                                            }
-                                        });
-                                    }
-                                }
-
-                                console.log('Loading source:', item.source);
-                                await player.load(item.source);
-                                console.log('Source loaded successfully');
-
-                                // 显示视频信息
-                                const videoInfo = document.getElementById('videoInfo');
-                                const videoTitle = videoInfo.querySelector('.video-title');
-                                const videoCategory = videoInfo.querySelector('.video-category .badge');
-                                
-                                videoTitle.textContent = item.tvgName;
-                                videoCategory.textContent = item.groupTitle;
-                                
-                                videoInfo.classList.remove('d-none');
-                                videoPlayer.scrollIntoView({ behavior: 'smooth' });
-                                videoPlayer.classList.remove("d-none");
-
-                                saveRecentPlayed(item);
-                            } catch (error) {
-                                console.error('Error in renderPlaylist:', error);
-                                onPlayerError(error);
-                                videoPlayer.classList.add("d-none");
-                            }
-                        });
+                        const channelItem = createChannelElement(item);
 
                         channelsContainer.appendChild(channelItem);
                     });
@@ -415,29 +307,181 @@
             target.appendChild(fragment);
         }
 
-        function onPlayerError(error) {
-            console.error('Detailed error information:', error);
-            
-            // You can add more specific error handling here
-            if (error.code === shaka.util.Error.Code.DASH_INVALID_XML) {
-                console.error('Invalid DASH manifest');
-            } else if (error.code === shaka.util.Error.Code.BAD_HTTP_STATUS) {
-                console.error('Bad HTTP status');
-            }
-            
-            // Clear any existing error messages
-            clearErrorMessage();
+        function createChannelElement(item) {
+            const channelDiv = document.createElement("div");
+            channelDiv.className = "channel";
 
-            // Display an error message to the user
-            const errorMessage = document.createElement('div');
-            errorMessage.classList.add('video-error-message');  // Add a class for easy identification
-            errorMessage.textContent = `Error loading video: ${error.message || error.code}`;
-            errorMessage.style.color = 'red';
-            videoPlayer.parentNode.insertBefore(errorMessage, videoPlayer.nextSibling);
+            // 添加图片，使用 base64 的默认图片替代 placeholder.com
+            const logoImage = document.createElement("img");
+            const defaultImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGFsaWdubWVudC1iYXNlbGluZT0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZpbGw9IiM5OTkiPlRWPC90ZXh0Pjwvc3ZnPg==';
+            
+            logoImage.src = item.tvgLogo || defaultImage;
+            logoImage.onerror = () => { 
+                logoImage.src = defaultImage;
+            };
+            channelDiv.appendChild(logoImage);
+
+            // 添加频道名称
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = item.tvgName;
+            channelDiv.appendChild(nameSpan);
+
+            channelDiv.addEventListener("click", () => {
+                clearErrorMessage();
+                playVideo(item);
+            });
+
+            return channelDiv;
         }
 
+        function playVideo(item, retryCount = 0) {
+            const maxRetries = 3;
+            
+            try {
+                clearErrorMessage();
+                
+                // 显示视频信息和播放器
+                const videoInfo = document.getElementById('videoInfo');
+                const videoTitle = videoInfo.querySelector('.video-title');
+                const videoCategory = videoInfo.querySelector('.video-category');
+                const playerElement = document.getElementById('videoPlayer');
+                const playerContainer = document.querySelector('.player-container');
+                const liveBadge = document.querySelector('.live-badge');
+                
+                // 初始隐藏 LIVE 标志
+                if (liveBadge) {
+                    liveBadge.style.display = 'none';
+                }
+                
+                videoTitle.textContent = item.tvgName;
+                videoCategory.textContent = item.groupTitle;
+                videoInfo.classList.remove('d-none');
+                playerElement.style.display = 'block';
+                playerContainer.classList.remove('d-none');
+
+                console.log('Starting playback of:', item.source);
+
+                // 停止当前播放
+                if (hls) {
+                    hls.destroy();
+                    hls = new Hls({
+                        maxBufferLength: 30,
+                        maxMaxBufferLength: 60
+                    });
+                }
+
+                // 使用 HLS.js 加载视频
+                if (Hls.isSupported()) {
+                    hls.loadSource(item.source);
+                    hls.attachMedia(playerElement);
+                    
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        player.play().catch(error => {
+                            console.error('Play failed:', error);
+                            if (retryCount < maxRetries) {
+                                setTimeout(() => {
+                                    playVideo(item, retryCount + 1);
+                                }, 1000);
+                            } else {
+                                onPlayerError(new Error('播放失败，请检查网络连接或稍后重试'));
+                            }
+                        });
+                    });
+
+                    // 在视频开始播放时显示 LIVE 标志
+                    player.on('playing', () => {
+                        if (liveBadge) {
+                            liveBadge.style.display = 'inline-block';
+                        }
+                    });
+
+                    // 在视频暂停或结束时隐藏 LIVE 标志
+                    player.on('pause ended', () => {
+                        if (liveBadge) {
+                            liveBadge.style.display = 'none';
+                        }
+                    });
+
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        if (data.fatal) {
+                            switch(data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    console.log('Fatal network error encountered, trying to recover...');
+                                    hls.startLoad();
+                                    break;
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    console.log('Fatal media error encountered, trying to recover...');
+                                    hls.recoverMediaError();
+                                    break;
+                                default:
+                                    console.error('Fatal error:', data);
+                                    onPlayerError(new Error('Playback error: ' + data.details));
+                                    break;
+                            }
+                        }
+                    });
+                }
+                // 原生 HLS 支持（如 Safari）
+                else if (playerElement.canPlayType('application/vnd.apple.mpegurl')) {
+                    playerElement.src = item.source;
+                    player.play().catch(error => {
+                        console.error('Play failed:', error);
+                        onPlayerError(error);
+                    });
+                }
+
+                // 保存到最近播放
+                saveRecentPlayed(item);
+                
+                // 滚动到播放器位置
+                playerElement.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Error in playVideo:', error);
+                if (retryCount < maxRetries) {
+                    setTimeout(() => {
+                        playVideo(item, retryCount + 1);
+                    }, 1000);
+                } else {
+                    onPlayerError(error);
+                }
+            }
+        }
+
+        // 更新错误处理函数
+        function onPlayerError(error) {
+            console.error('Playback error:', error);
+            
+            clearErrorMessage();
+
+            // 发生错误时隐藏播放器和播放器容器
+            const playerElement = document.getElementById('videoPlayer');
+            const playerContainer = document.querySelector('.player-container');
+            
+            playerElement.style.display = 'none';
+            playerContainer.classList.add('d-none');
+            document.getElementById('videoInfo').classList.add('d-none');
+
+            const errorMessage = document.createElement('div');
+            errorMessage.classList.add('video-error-message');
+            errorMessage.textContent = '播放出错: ' + (error.message || '未知错误');
+            errorMessage.style.color = 'red';
+            errorMessage.style.padding = '10px';
+            errorMessage.style.marginTop = '10px';
+            
+            if (playerElement.parentNode) {
+                playerElement.parentNode.insertBefore(errorMessage, playerElement.nextSibling);
+            }
+
+            // 隐藏直播标志
+            const liveBadge = document.querySelector('.live-badge');
+            if (liveBadge) {
+                liveBadge.style.display = 'none';
+            }
+        }
+
+        // 清除错误信息
         function clearErrorMessage() {
-            // Clear any existing error messages
             const existingErrorMessage = document.querySelector('.video-error-message');
             if (existingErrorMessage) {
                 existingErrorMessage.remove();
@@ -646,3 +690,13 @@
                 recentPlayedSection.classList.add("d-none");
             }
         }
+
+        // 清理函数
+        function cleanupPlayer() {
+            if (hls) {
+                hls.destroy();
+            }
+        }
+
+        // 页面卸载时清理
+        window.addEventListener('beforeunload', cleanupPlayer);

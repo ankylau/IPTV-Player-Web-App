@@ -12,8 +12,10 @@ html, body {
 }
 
 #videoPlayer {
-    width: 100%;
-    height: auto;
+    width: 100% !important;
+    /*max-width: 640px !important; */
+    margin: 0 auto;
+    background-color: #000;
 }
 
 .input-group-btn {
@@ -240,11 +242,8 @@ html, body {
 
 .video-category {
     margin-top: 5px;
-}
-
-.video-category .badge {
-    font-weight: normal;
     font-size: 0.9rem;
+    color: #6c757d;
 }
 
 /* 移动端菜单按钮样式 */
@@ -382,4 +381,56 @@ html, body {
     background-color: #6c757d !important;
     border-color: #6c757d !important;
     opacity: 0.65;
+}
+
+/* 播放器容器样式 */
+.player-container {
+    position: relative;
+    /*max-width: 640px;*/
+    margin: 0 auto;
+}
+
+/* Plyr 播放器样式调整 */
+.plyr {
+    height: auto !important;
+    aspect-ratio: 16/9;
+}
+
+.plyr--video {
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+
+/* 直播标志样式 */
+.live-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #ff0000;
+    color: white;
+    padding: 1px 3px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 5;
+    display: none;  /* 默认隐藏 */
+}
+
+.live-badge::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border-radius: 50%;
+    margin-right: 5px;
+    margin-bottom: 1px;
+    animation: live-pulse 1.5s ease infinite;
+}
+
+@keyframes live-pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
 }

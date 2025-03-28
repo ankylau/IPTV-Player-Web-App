@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
@@ -52,11 +53,14 @@
                     <div class="col-12 order-1 order-md-2">
                         <div id="videoInfo" class="video-info d-none mb-2">
                             <h2 class="video-title"></h2>
-                            <div class="video-category">
-                                <span class="badge bg-secondary"></span>
-                            </div>
+                            <div class="video-category"></div>
                         </div>
-                        <video id="videoPlayer" controls autoplay muted class="d-none"></video>
+                        <div class="player-container">
+                            <div class="live-badge">LIVE</div>
+                            <video id="videoPlayer" playsinline>
+                                <source type="application/x-mpegURL">
+                            </video>
+                        </div>
                     </div>
 
                     <div class="col-12 order-3 mt-3" id="recentPlayedSection">
@@ -71,7 +75,9 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.2/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.0/shaka-player.compiled.js"></script>
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/hls.js/8.0.0-beta.3/hls.min.js"></script>
+    <!--script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script-->
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script src="main.js"></script>
     <script>
         // 添加移动端菜单控制
