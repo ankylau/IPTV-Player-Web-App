@@ -395,16 +395,74 @@
                     hls.loadSource(item.source);
                     hls.attachMedia(playerElement);
                     
+                    // 添加错误处理
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        if (data.fatal) {
+                            switch(data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    const errorDiv = document.createElement('div');
+                                    errorDiv.className = 'alert alert-danger';
+                                    errorDiv.textContent = '网络错误：无法加载视频流，请检查网络连接';
+                                    document.querySelector('.player-container').appendChild(errorDiv);
+                                    
+                                    // 尝试重新加载
+                                    setTimeout(() => {
+                                        hls.startLoad();
+                                        errorDiv.remove();
+                                    }, 3000);
+                                    break;
+                                    
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    const mediaErrorDiv = document.createElement('div');
+                                    mediaErrorDiv.className = 'alert alert-danger';
+                                    mediaErrorDiv.textContent = '媒体错误：视频格式不支持或已损坏';
+                                    document.querySelector('.player-container').appendChild(mediaErrorDiv);
+                                    
+                                    // 尝试恢复媒体错误
+                                    setTimeout(() => {
+                                        hls.recoverMediaError();
+                                        mediaErrorDiv.remove();
+                                    }, 3000);
+                                    break;
+                                    
+                                default:
+                                    const fatalErrorDiv = document.createElement('div');
+                                    fatalErrorDiv.className = 'alert alert-danger';
+                                    fatalErrorDiv.textContent = '播放错误：' + (data.details || '未知错误');
+                                    document.querySelector('.player-container').appendChild(fatalErrorDiv);
+                                    
+                                    // 3秒后移除错误提示
+                                    setTimeout(() => fatalErrorDiv.remove(), 3000);
+                                    break;
+                            }
+                        }
+                    });
+
+                    // 添加加载超时检测
+                    let loadTimeout = setTimeout(() => {
+                        const timeoutDiv = document.createElement('div');
+                        timeoutDiv.className = 'alert alert-danger';
+                        timeoutDiv.textContent = '加载超时：请检查网络连接或视频源是否可用';
+                        document.querySelector('.player-container').appendChild(timeoutDiv);
+                        
+                        // 3秒后移除错误提示
+                        setTimeout(() => timeoutDiv.remove(), 3000);
+                    }, 10000); // 10秒超时
+
+                    // 清除超时检测
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        clearTimeout(loadTimeout);
+                    });
+
                     hls.on(Hls.Events.MANIFEST_PARSED, function() {
                         player.play().catch(error => {
-                            console.error('Play failed:', error);
-                            if (retryCount < maxRetries) {
-                                setTimeout(() => {
-                                    playVideo(item, retryCount + 1);
-                                }, 1000);
-                            } else {
-                                onPlayerError(new Error('播放失败，请检查网络连接或稍后重试'));
-                            }
+                            const playErrorDiv = document.createElement('div');
+                            playErrorDiv.className = 'alert alert-danger';
+                            playErrorDiv.textContent = '播放失败：' + error.message;
+                            document.querySelector('.player-container').appendChild(playErrorDiv);
+                            
+                            // 3秒后移除错误提示
+                            setTimeout(() => playErrorDiv.remove(), 3000);
                         });
                     });
 
@@ -421,32 +479,18 @@
                             liveBadge.style.display = 'none';
                         }
                     });
-
-                    hls.on(Hls.Events.ERROR, function(event, data) {
-                        if (data.fatal) {
-                            switch(data.type) {
-                                case Hls.ErrorTypes.NETWORK_ERROR:
-                                    console.log('Fatal network error encountered, trying to recover...');
-                                    hls.startLoad();
-                                    break;
-                                case Hls.ErrorTypes.MEDIA_ERROR:
-                                    console.log('Fatal media error encountered, trying to recover...');
-                                    hls.recoverMediaError();
-                                    break;
-                                default:
-                                    console.error('Fatal error:', data);
-                                    onPlayerError(new Error('Playback error: ' + data.details));
-                                    break;
-                            }
-                        }
-                    });
                 }
                 // 原生 HLS 支持（如 Safari）
                 else if (playerElement.canPlayType('application/vnd.apple.mpegurl')) {
                     playerElement.src = item.source;
                     player.play().catch(error => {
-                        console.error('Play failed:', error);
-                        onPlayerError(error);
+                        const nativeErrorDiv = document.createElement('div');
+                        nativeErrorDiv.className = 'alert alert-danger';
+                        nativeErrorDiv.textContent = '播放失败：' + error.message;
+                        document.querySelector('.player-container').appendChild(nativeErrorDiv);
+                        
+                        // 3秒后移除错误提示
+                        setTimeout(() => nativeErrorDiv.remove(), 3000);
                     });
                 }
 
@@ -458,12 +502,18 @@
 
             } catch (error) {
                 console.error('Error in playVideo:', error);
+                const generalErrorDiv = document.createElement('div');
+                generalErrorDiv.className = 'alert alert-danger';
+                generalErrorDiv.textContent = '播放错误：' + error.message;
+                document.querySelector('.player-container').appendChild(generalErrorDiv);
+                
+                // 3秒后移除错误提示
+                setTimeout(() => generalErrorDiv.remove(), 3000);
+                
                 if (retryCount < maxRetries) {
                     setTimeout(() => {
                         playVideo(item, retryCount + 1);
                     }, 1000);
-                } else {
-                    onPlayerError(error);
                 }
             }
         }
@@ -720,3 +770,22 @@
 
         // 页面卸载时清理
         window.addEventListener('beforeunload', cleanupPlayer);
+
+        // 添加一些CSS样式
+        const style = document.createElement('style');
+        style.textContent = `
+            .player-container .alert {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1000;
+                background: rgba(220, 53, 69, 0.9);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                text-align: center;
+                min-width: 200px;
+            }
+        `;
+        document.head.appendChild(style);
