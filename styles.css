@@ -79,6 +79,14 @@ html, body {
     margin-bottom: 10px;
 }
 
+#playlistItemsContainer {
+    margin-top: 10px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #6c757d transparent;
+}
+
 #recentPlayedList {
     background-color: rgba(0, 0, 0, 0.1);
     padding: 15px;
