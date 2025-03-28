@@ -16,11 +16,33 @@
             const recentPlayedSection = document.getElementById("recentPlayedSection");
             const recentPlayedList = document.getElementById("recentPlayedList");
 
-            //  Get playlist url from url if any
-            var urlParams = new URLSearchParams(window.location.search);
-            var playlistParam = urlParams.get('playlist');
-            if (playlistParam != null) {
-                localStorage.setItem("m3uPlaylistURL", playlistParam);
+            // 获取URL参数并处理
+            const urlParams = new URLSearchParams(window.location.search);
+            const m3u8Param = urlParams.get('m3u8');
+            const m3uParam = urlParams.get('m3u');
+            
+            if (m3u8Param) {
+                // 如果有m3u8参数，直接设置到输入框并播放
+                m3uURLInput.value = decodeURIComponent(m3u8Param);
+                setTimeout(() => loadM3UButton.click(), 500);
+            } else if (m3uParam) {
+                // 如果有m3u参数，设置到输入框并解析播放列表
+                m3uURLInput.value = decodeURIComponent(m3uParam);
+                setTimeout(() => loadM3UButton.click(), 500);
+            } else {
+                // 保持原有的playlist参数处理逻辑
+                const playlistParam = urlParams.get('playlist');
+                if (playlistParam) {
+                    m3uURLInput.value = decodeURIComponent(playlistParam);
+                    setTimeout(() => loadM3UButton.click(), 500);
+                } else {
+                    // 从localStorage加载上次的URL
+                    const savedPlaylistURL = localStorage.getItem("m3uPlaylistURL");
+                    if (savedPlaylistURL) {
+                        m3uURLInput.value = savedPlaylistURL;
+                        setTimeout(() => loadM3UButton.click(), 500);
+                    }
+                }
             }
 
             // Load search input from local storage
@@ -45,22 +67,9 @@
                     'current-time',
                     'mute',
                     'volume',
+                    'pip',
                     'fullscreen'
-                ],
-                fullscreen: {
-                    enabled: true,
-                    fallback: true,
-                    iosNative: true
-                },
-                // 添加直播标志
-                markers: {
-                    enabled: true,
-                    points: [{
-                        time: 0,
-                        label: 'LIVE',
-                        class: 'plyr__live-badge'
-                    }]
-                }
+                ]
             });
 
 
@@ -80,13 +89,46 @@
             loadM3UButton.addEventListener("click", async () => {
                 try {
                     loadM3UButton.disabled = true;
+                    const m3uURL = m3uURLInput.value;
+                    
+                    // 添加判断URL是否为M3U8链接的逻辑
+                    if (m3uURL.toLowerCase().endsWith('.m3u8')) {
+                        // 直接播放M3U8链接
+                        const directPlayItem = {
+                            tvgName: 'M3U8直接播放',
+                            source: m3uURL,
+                            groupTitle: '直接播放流'
+                        };
+                        
+                        // 显示播放器和相关元素
+                        const videoInfo = document.getElementById('videoInfo');
+                        const videoTitle = videoInfo.querySelector('.video-title');
+                        const videoCategory = videoInfo.querySelector('.video-category');
+                        
+                        videoTitle.textContent = '直接播放流';
+                        videoCategory.textContent = m3uURL;
+                        videoInfo.classList.remove('d-none');
+                        
+                        document.querySelector('.player-container').classList.remove('d-none');
+                        document.getElementById('videoPlayer').style.display = 'block';
+                        
+                        // 清除现有播放列表
+                        clearPlaylist();
+                        document.getElementById("channel-placeholder").textContent = "直接播放模式";
+                        document.getElementById("channel-placeholder").classList.remove("d-none");
+                        
+                        // 播放视频
+                        await playVideo(directPlayItem);
+                        return;
+                    }
+
+                    // 如果不是M3U8链接，继续原来的M3U解析逻辑
                     const loadingProgress = document.getElementById('loadingProgress');
                     const progressBar = loadingProgress.querySelector('.progress-bar');
                     loadingProgress.classList.remove('d-none');
                     progressBar.style.width = '0%';
                     progressBar.textContent = 'Connecting...';
-                    
-                    const m3uURL = m3uURLInput.value;
+
                     localStorage.setItem("m3uPlaylistURL", m3uURL);
 
                     // 使用 fetch 并监听进度

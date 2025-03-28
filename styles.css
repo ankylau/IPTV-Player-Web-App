@@ -394,7 +394,7 @@ html, body {
 /* 播放器容器样式 */
 .player-container {
     position: relative;
-    /*max-width: 640px;*/
+    max-width: 1200px;
     margin: 0 auto;
 }
 
