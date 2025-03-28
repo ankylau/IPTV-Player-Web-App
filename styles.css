@@ -9,6 +9,8 @@ html, body {
     max-height: 100vh;
     overflow-y: auto;
     padding-top: 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(108, 117, 125, 0.5) transparent;
 }
 
 #videoPlayer {
@@ -84,7 +86,7 @@ html, body {
     overflow-x: hidden;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: #6c757d transparent;
+    scrollbar-color: rgba(108, 117, 125, 0.5) transparent;
 }
 
 #recentPlayedList {
@@ -96,7 +98,7 @@ html, body {
     display: flex;
     overflow-x: auto;
     scrollbar-width: thin;
-    scrollbar-color: #6c757d transparent;
+    scrollbar-color: rgba(108, 117, 125, 0.5) transparent;
 }
 
 #recentPlayedList::-webkit-scrollbar {
@@ -105,11 +107,17 @@ html, body {
 
 #recentPlayedList::-webkit-scrollbar-track {
     background: transparent;
+    border-radius: 3px;
 }
 
 #recentPlayedList::-webkit-scrollbar-thumb {
-    background-color: #6c757d;
+    background-color: rgba(108, 117, 125, 0.5);
     border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+#recentPlayedList::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(108, 117, 125, 0.8);
 }
 
 /* 分类标题样式优化 */
@@ -441,4 +449,183 @@ html, body {
     0% { opacity: 1; }
     50% { opacity: 0.5; }
     100% { opacity: 1; }
+}
+
+/* Webkit浏览器的滚动条样式 */
+#playlist::-webkit-scrollbar {
+    width: 6px;
+}
+
+#playlist::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+#playlist::-webkit-scrollbar-thumb {
+    background-color: rgba(108, 117, 125, 0.5);
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+#playlist::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(108, 117, 125, 0.8);
+}
+
+/* 播放列表内容区域的滚动条样式 */
+#playlistItemsContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+#playlistItemsContainer::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+#playlistItemsContainer::-webkit-scrollbar-thumb {
+    background-color: rgba(108, 117, 125, 0.5);
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+#playlistItemsContainer::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(108, 117, 125, 0.8);
+}
+
+/* 最近播放区域的横向滚动条样式 */
+#recentPlayedList::-webkit-scrollbar {
+    height: 6px;
+}
+
+#recentPlayedList::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+#recentPlayedList::-webkit-scrollbar-thumb {
+    background-color: rgba(108, 117, 125, 0.5);
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+#recentPlayedList::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(108, 117, 125, 0.8);
+}
+
+/* 添加错误提示样式 */
+.error-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(220, 53, 69, 0.95);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 300px;
+    max-width: 80%;
+    animation: slideDown 0.3s ease-out, fadeOut 0.3s ease-out 2.7s;
+}
+
+.error-toast i {
+    font-size: 20px;
+}
+
+.error-toast .error-message {
+    flex-grow: 1;
+    font-size: 14px;
+}
+
+.error-toast .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    opacity: 0.8;
+    cursor: pointer;
+    padding: 0 4px;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.error-toast .close-btn:hover {
+    opacity: 1;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* 播放器内错误提示样式 */
+.player-error {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-width: 250px;
+}
+
+.player-error i {
+    font-size: 24px;
+    color: #dc3545;
+}
+
+.player-error .retry-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background-color 0.2s;
+}
+
+.player-error .retry-btn:hover {
+    background-color: #c82333;
+}
+
+.player-error .retry-btn i {
+    color: white;  /* 确保图标颜色为白色 */
+    margin-right: 4px;
+    font-size: 14px;
+}
+
+/* 播放器错误状态样式 */
+.player-container.has-error .plyr--video {
+    pointer-events: none;  /* 禁用播放器交互 */
+}
+
+.player-container.has-error .plyr__control--overlaid,
+.player-container.has-error .plyr__controls {
+    display: none !important;  /* 隐藏播放器控制按钮 */
 }

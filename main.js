@@ -3,6 +3,24 @@
         let player;
         let hls;
         let recentPlayed = [];
+        let currentPlayingItem = null;
+
+        // 添加加载状态跟踪
+        let isLoading = false;
+
+        // 添加错误重试计数器
+        let errorRetryCount = 0;
+
+        // 添加播放状态跟踪
+        let isPlaying = false;
+
+        // 添加错误处理防抖
+        function debounceErrorMessage(message, isPlayerError, delay = 100) {
+            clearTimeout(window.errorMessageTimeout);
+            window.errorMessageTimeout = setTimeout(() => {
+                showErrorMessage(message, isPlayerError);
+            }, delay);
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
             const videoPlayer = document.getElementById("videoPlayer");
@@ -73,9 +91,9 @@
                     if (m3uURL.toLowerCase().endsWith('.m3u8')) {
                         // 直接播放M3U8链接
                         const directPlayItem = {
-                            tvgName: 'M3U8直接播放',
+                            tvgName: 'M3U8 PLAYER',
                             source: m3uURL,
-                            groupTitle: '直接播放流'
+                            groupTitle: m3uURL
                         };
                         
                         // 显示播放器和相关元素
@@ -275,7 +293,7 @@
                             await playVideo(item);
                         } catch (error) {
                             console.error('Error in renderPlaylist:', error);
-                            onPlayerError(error);
+                            showErrorMessage(error.message || '播放出错，请稍后重试', true);
                             videoPlayer.classList.add("d-none");
                         }
                     });
@@ -355,9 +373,11 @@
         }
 
         function playVideo(item, retryCount = 0) {
+            currentPlayingItem = item;
             const maxRetries = 3;
             
             try {
+                // 确保在开始新播放前清除所有错误提示
                 clearErrorMessage();
                 
                 // 显示视频信息和播放器
@@ -395,74 +415,41 @@
                     hls.loadSource(item.source);
                     hls.attachMedia(playerElement);
                     
+                    let loadTimeout;
+                    
                     // 添加错误处理
                     hls.on(Hls.Events.ERROR, function(event, data) {
                         if (data.fatal) {
+                            // 清除超时计时器
+                            clearTimeout(loadTimeout);
+                            
                             switch(data.type) {
                                 case Hls.ErrorTypes.NETWORK_ERROR:
-                                    const errorDiv = document.createElement('div');
-                                    errorDiv.className = 'alert alert-danger';
-                                    errorDiv.textContent = '网络错误：无法加载视频流，请检查网络连接';
-                                    document.querySelector('.player-container').appendChild(errorDiv);
-                                    
-                                    // 尝试重新加载
-                                    setTimeout(() => {
-                                        hls.startLoad();
-                                        errorDiv.remove();
-                                    }, 3000);
+                                    showErrorMessage('网络错误：无法加载视频流，请检查网络连接', true);
                                     break;
-                                    
                                 case Hls.ErrorTypes.MEDIA_ERROR:
-                                    const mediaErrorDiv = document.createElement('div');
-                                    mediaErrorDiv.className = 'alert alert-danger';
-                                    mediaErrorDiv.textContent = '媒体错误：视频格式不支持或已损坏';
-                                    document.querySelector('.player-container').appendChild(mediaErrorDiv);
-                                    
-                                    // 尝试恢复媒体错误
-                                    setTimeout(() => {
-                                        hls.recoverMediaError();
-                                        mediaErrorDiv.remove();
-                                    }, 3000);
+                                    showErrorMessage('媒体错误：视频格式不支持或已损坏', true);
                                     break;
-                                    
                                 default:
-                                    const fatalErrorDiv = document.createElement('div');
-                                    fatalErrorDiv.className = 'alert alert-danger';
-                                    fatalErrorDiv.textContent = '播放错误：' + (data.details || '未知错误');
-                                    document.querySelector('.player-container').appendChild(fatalErrorDiv);
-                                    
-                                    // 3秒后移除错误提示
-                                    setTimeout(() => fatalErrorDiv.remove(), 3000);
+                                    showErrorMessage('播放错误：' + (data.details || '未知错误'), true);
                                     break;
                             }
                         }
                     });
 
-                    // 添加加载超时检测
-                    let loadTimeout = setTimeout(() => {
-                        const timeoutDiv = document.createElement('div');
-                        timeoutDiv.className = 'alert alert-danger';
-                        timeoutDiv.textContent = '加载超时：请检查网络连接或视频源是否可用';
-                        document.querySelector('.player-container').appendChild(timeoutDiv);
-                        
-                        // 3秒后移除错误提示
-                        setTimeout(() => timeoutDiv.remove(), 3000);
-                    }, 10000); // 10秒超时
+                    // 修改超时检测
+                    loadTimeout = setTimeout(() => {
+                        // 只有在还没有触发其他错误的情况下才显示超时错误
+                        if (!document.querySelector('.player-error')) {
+                            showErrorMessage('加载超时：请检查网络连接或视频源是否可用', true);
+                        }
+                    }, 10000);
 
-                    // 清除超时检测
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                        clearTimeout(loadTimeout);
-                    });
-
+                    // 修改播放错误处理
                     hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        clearTimeout(loadTimeout);  // 成功加载后清除超时计时器
                         player.play().catch(error => {
-                            const playErrorDiv = document.createElement('div');
-                            playErrorDiv.className = 'alert alert-danger';
-                            playErrorDiv.textContent = '播放失败：' + error.message;
-                            document.querySelector('.player-container').appendChild(playErrorDiv);
-                            
-                            // 3秒后移除错误提示
-                            setTimeout(() => playErrorDiv.remove(), 3000);
+                            showErrorMessage('播放失败：' + error.message, true);
                         });
                     });
 
@@ -484,13 +471,7 @@
                 else if (playerElement.canPlayType('application/vnd.apple.mpegurl')) {
                     playerElement.src = item.source;
                     player.play().catch(error => {
-                        const nativeErrorDiv = document.createElement('div');
-                        nativeErrorDiv.className = 'alert alert-danger';
-                        nativeErrorDiv.textContent = '播放失败：' + error.message;
-                        document.querySelector('.player-container').appendChild(nativeErrorDiv);
-                        
-                        // 3秒后移除错误提示
-                        setTimeout(() => nativeErrorDiv.remove(), 3000);
+                        showErrorMessage('播放失败：' + error.message, true);
                     });
                 }
 
@@ -502,13 +483,7 @@
 
             } catch (error) {
                 console.error('Error in playVideo:', error);
-                const generalErrorDiv = document.createElement('div');
-                generalErrorDiv.className = 'alert alert-danger';
-                generalErrorDiv.textContent = '播放错误：' + error.message;
-                document.querySelector('.player-container').appendChild(generalErrorDiv);
-                
-                // 3秒后移除错误提示
-                setTimeout(() => generalErrorDiv.remove(), 3000);
+                showErrorMessage('播放错误：' + error.message, true);
                 
                 if (retryCount < maxRetries) {
                     setTimeout(() => {
@@ -518,44 +493,62 @@
             }
         }
 
-        // 更新错误处理函数
-        function onPlayerError(error) {
-            console.error('Playback error:', error);
-            
-            clearErrorMessage();
-
-            // 发生错误时隐藏播放器和播放器容器
-            const playerElement = document.getElementById('videoPlayer');
-            const playerContainer = document.querySelector('.player-container');
-            
-            playerElement.style.display = 'none';
-            playerContainer.classList.add('d-none');
-            document.getElementById('videoInfo').classList.add('d-none');
-
-            const errorMessage = document.createElement('div');
-            errorMessage.classList.add('video-error-message');
-            errorMessage.textContent = '播放出错: ' + (error.message || '未知错误');
-            errorMessage.style.color = 'red';
-            errorMessage.style.padding = '10px';
-            errorMessage.style.marginTop = '10px';
-            
-            if (playerElement.parentNode) {
-                playerElement.parentNode.insertBefore(errorMessage, playerElement.nextSibling);
-            }
-
-            // 隐藏直播标志
-            const liveBadge = document.querySelector('.live-badge');
-            if (liveBadge) {
-                liveBadge.style.display = 'none';
+        // 更新显示错误提示的函数
+        function showErrorMessage(message, isPlayerError = false) {
+            if (isPlayerError) {
+                // 播放器内的错误提示
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'player-error';
+                errorDiv.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>${message}</div>
+                    <button class="retry-btn">
+                        <i class="fas fa-redo"></i> 重试
+                    </button>
+                `;
+                
+                const playerContainer = document.querySelector('.player-container');
+                playerContainer.classList.add('has-error');
+                playerContainer.appendChild(errorDiv);
+                
+                // 重试按钮点击事件
+                const retryBtn = errorDiv.querySelector('.retry-btn');
+                retryBtn.onclick = () => {
+                    playerContainer.classList.remove('has-error');
+                    errorDiv.remove();
+                    playVideo(currentPlayingItem);
+                };
+                
+                // 30秒后自动移除错误提示
+                setTimeout(() => {
+                    playerContainer.classList.remove('has-error');
+                    errorDiv.remove();
+                }, 30000);
+            } else {
+                // 顶部Toast错误提示
+                const toast = document.createElement('div');
+                toast.className = 'error-toast';
+                toast.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div class="error-message">${message}</div>
+                    <button class="close-btn">&times;</button>
+                `;
+                
+                document.body.appendChild(toast);
+                
+                // 关闭按钮点击事件
+                const closeBtn = toast.querySelector('.close-btn');
+                closeBtn.onclick = () => toast.remove();
+                
+                // 3秒后自动消失
+                setTimeout(() => toast.remove(), 3000);
             }
         }
 
-        // 清除错误信息
+        // 修改清除错误信息函数
         function clearErrorMessage() {
-            const existingErrorMessage = document.querySelector('.video-error-message');
-            if (existingErrorMessage) {
-                existingErrorMessage.remove();
-            }
+            document.querySelectorAll('.video-error-message, .error-toast, .player-error').forEach(el => el.remove());
+            document.querySelector('.player-container')?.classList.remove('has-error');
         }
 
         function parseM3U(content) {
@@ -766,26 +759,12 @@
             if (hls) {
                 hls.destroy();
             }
+            if (player) {
+                player.destroy();
+            }
+            // 清除所有错误提示
+            document.querySelectorAll('.error-toast, .player-error').forEach(el => el.remove());
         }
 
         // 页面卸载时清理
         window.addEventListener('beforeunload', cleanupPlayer);
-
-        // 添加一些CSS样式
-        const style = document.createElement('style');
-        style.textContent = `
-            .player-container .alert {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 1000;
-                background: rgba(220, 53, 69, 0.9);
-                color: white;
-                padding: 10px 20px;
-                border-radius: 5px;
-                text-align: center;
-                min-width: 200px;
-            }
-        `;
-        document.head.appendChild(style);
