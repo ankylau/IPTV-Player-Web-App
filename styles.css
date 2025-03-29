@@ -644,3 +644,17 @@ html, body {
 .channel-logo.loaded {
     opacity: 1;
 }
+
+/* 添加标题链接样式 */
+.header-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s ease;
+}
+
+.header-link:hover {
+    opacity: 0.8;
+    color: inherit;
+}

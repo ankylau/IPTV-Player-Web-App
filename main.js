@@ -262,6 +262,27 @@
                     channelPlaceholder.classList.remove("d-none");
                 }
             });
+
+            // 为输入框添加回车键处理
+            m3uURLInput.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault(); // 阻止默认的回车行为
+                    document.getElementById("loadM3U").click(); // 触发加载按钮点击
+                }
+            });
+
+            // 为搜索框添加回车键处理
+            searchInput.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    // 触发搜索
+                    const searchEvent = new Event('input', {
+                        bubbles: true,
+                        cancelable: true,
+                    });
+                    searchInput.dispatchEvent(searchEvent);
+                }
+            });
         });
 
         // Function to render the playlist
