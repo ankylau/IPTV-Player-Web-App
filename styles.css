@@ -658,3 +658,60 @@ html, body {
     opacity: 0.8;
     color: inherit;
 }
+
+/* 添加新的布局样式 */
+.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* 固定左侧栏 */
+.sidebar-column {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 16.666667%; /* 相当于 col-md-2 的宽度 */
+    z-index: 1000;
+    padding: 0;
+    overflow-y: auto;
+}
+
+/* 调整右侧内容区域 */
+.content-column {
+    margin-left: 16.666667%; /* 与左侧栏宽度相同 */
+    width: 83.333333%; /* 相当于 col-md-10 的宽度 */
+}
+
+/* 移动端样式调整 */
+@media (max-width: 767.98px) {
+    .sidebar-column {
+        position: fixed;
+        left: -100%;
+        width: 80%;
+        transition: left 0.3s ease;
+    }
+
+    .sidebar-column.show {
+        left: 0;
+    }
+
+    .content-column {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* 保持其他原有的playlist样式 */
+#playlist {
+    background-color: #f8f9fa;
+    padding: 15px;
+    padding-top: 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(108, 117, 125, 0.5) transparent;
+}
