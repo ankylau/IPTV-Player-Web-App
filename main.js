@@ -92,8 +92,10 @@
                     // 隐藏欢迎区块
                     document.getElementById('welcomeSection').classList.add('d-none');
                     
-                    // 添加判断URL是否为M3U8链接的逻辑
-                    if (m3uURL.toLowerCase().endsWith('.m3u8')) {
+                    // 修改判断逻辑：检查URL是否为M3U8流
+                    const isM3U8Stream = m3uURL.toLowerCase().includes('.m3u8');
+                    
+                    if (isM3U8Stream) {
                         // 直接播放M3U8链接
                         const directPlayItem = {
                             tvgName: 'M3U8 PLAYER',
@@ -350,20 +352,34 @@
             }
 
             target.appendChild(fragment);
+
+            // 在渲染完成后初始化懒加载
+            setTimeout(() => {
+                initializeLazyLoading();
+            }, 0);
         }
 
         function createChannelElement(item) {
             const channelDiv = document.createElement("div");
             channelDiv.className = "channel";
 
-            // 添加图片，使用 base64 的默认图片替代 placeholder.com
+            // 创建图片元素
             const logoImage = document.createElement("img");
             const defaultImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGFsaWdubWVudC1iYXNlbGluZT0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZpbGw9IiM5OTkiPlRWPC90ZXh0Pjwvc3ZnPg==';
             
-            logoImage.src = item.tvgLogo || defaultImage;
+            // 设置懒加载属性
+            logoImage.loading = "lazy"; // 原生懒加载
+            logoImage.src = defaultImage; // 默认图片
+            if (item.tvgLogo) {
+                logoImage.dataset.src = item.tvgLogo; // 将实际图片URL存储在data-src属性中
+            }
+            logoImage.className = "channel-logo";
+            
+            // 错误处理
             logoImage.onerror = () => { 
                 logoImage.src = defaultImage;
             };
+
             channelDiv.appendChild(logoImage);
 
             // 添加频道名称
@@ -411,14 +427,31 @@
                 // 停止当前播放
                 if (hls) {
                     hls.destroy();
-                    hls = new Hls({
-                        maxBufferLength: 30,
-                        maxMaxBufferLength: 60
-                    });
                 }
+
+                // 创建新的 HLS 实例，添加更多配置选项
+                hls = new Hls({
+                    maxBufferLength: 30,
+                    maxMaxBufferLength: 60,
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    backBufferLength: 90,
+                    // 修改 xhrSetup 配置
+                    xhrSetup: function(xhr, url) {
+                        xhr.withCredentials = false;
+                        // 保持原始URL，不做任何修改
+                        xhr.open('GET', url, true);
+                    },
+                    // 添加自定义加载器配置
+                    fragLoadingMaxRetry: 5,
+                    manifestLoadingMaxRetry: 5,
+                    levelLoadingMaxRetry: 5
+                });
 
                 // 使用 HLS.js 加载视频
                 if (Hls.isSupported()) {
+                    console.log('Loading source:', item.source);
+                    
                     hls.loadSource(item.source);
                     hls.attachMedia(playerElement);
                     
@@ -775,3 +808,35 @@
 
         // 页面卸载时清理
         window.addEventListener('beforeunload', cleanupPlayer);
+
+        // 添加 IntersectionObserver 初始化函数
+        function initializeLazyLoading() {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const actualSrc = img.dataset.src;
+                        if (actualSrc) {
+                            img.src = actualSrc;
+                            img.removeAttribute('data-src');
+                            observer.unobserve(img);
+                        }
+                    }
+                });
+            }, {
+                rootMargin: '50px 0px', // 提前50px加载
+                threshold: 0.01
+            });
+
+            // 观察所有带有 data-src 属性的图片
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                imageObserver.observe(img);
+            });
+        }
+
+        // 添加 polyfill 检查（在文件开头添加）
+        if (!('IntersectionObserver' in window)) {
+            const script = document.createElement('script');
+            script.src = 'https://polyfill.io/v3/polyfill.min.js?features=IntersectionObserver';
+            document.head.appendChild(script);
+        }
