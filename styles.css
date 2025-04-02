@@ -725,6 +725,7 @@ html, body {
    --tw-text-opacity:1;
    color: rgb(107 114 128 / var(--tw-text-opacity));
    font-size:.75rem;
+   margin-bottom: 2rem;
 }
 
 .plyr__control--overlaid {
