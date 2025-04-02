@@ -66,7 +66,15 @@
                     'mute',
                     'volume',
                     'pip',
+                    'settings',
+                    'airplay',
                     'fullscreen'
+                ],
+                settings: [
+                    'captions',
+                    'quality',
+                    'speed',
+                    'loop'
                 ]
             });
 
