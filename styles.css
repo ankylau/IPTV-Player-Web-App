@@ -226,9 +226,9 @@ html, body {
 }
 
 .app-title {
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: #495057;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #000000;
     margin: 0;
 }
 
@@ -715,3 +715,10 @@ html, body {
     scrollbar-width: thin;
     scrollbar-color: rgba(108, 117, 125, 0.5) transparent;
 }
+
+#site-foot {
+   --tw-text-opacity:1;
+   color: rgb(107 114 128 / var(--tw-text-opacity));
+   font-size:.75rem;
+}
+
