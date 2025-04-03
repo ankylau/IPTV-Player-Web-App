@@ -601,11 +601,11 @@ html, body {
 
 .player-error i {
     font-size: 24px;
-    color: #dc3545;
+    color: var(--plyr-color-main);
 }
 
 .player-error .retry-btn {
-    background-color: #dc3545;
+    background-color: var(--plyr-color-main);
     color: white;
     border: none;
     padding: 6px 12px;
