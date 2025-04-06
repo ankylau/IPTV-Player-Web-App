@@ -6,6 +6,10 @@
 
 html, body {
     height: 100%;
+    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,PingFang SC,Source Han Sans CN,Hiragino Sans GB,Microsoft YaHei,WenQuanYi Micro Hei,sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    cursor: default;
 }
 
 /* Custom CSS to adjust layout */
@@ -18,6 +22,30 @@ html, body {
     scrollbar-width: thin;
     scrollbar-color: rgba(108, 117, 125, 0.5) transparent;
 }
+
+.category-header .fas{
+    font-size: 12px;
+}
+
+.category-title{
+    font-weight:300 !important;
+}
+
+.bg-secondary{
+    font-weight: 300;
+    color: var(--plyr-color-main);
+    background-color: rgb(78 224 95 / 20%) !important;
+}
+.category-container{
+    margin-bottom: 0.3rem!important;
+}
+#site-foot {
+   --tw-text-opacity:1;
+   color: rgb(107 114 128 / var(--tw-text-opacity));
+   font-size:.75rem;
+   margin-bottom: 2rem;
+}
+
 
 #videoPlayer {
     width: 100% !important;
@@ -250,10 +278,13 @@ html, body {
 
 /* 视频信息样式 */
 .video-info {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    /*
     padding: 10px;
     background-color: #f8f9fa;
     border-radius: 8px;
-    margin-top: 10px;
+    */
 }
 
 .video-title {
@@ -732,27 +763,6 @@ html, body {
     }
 }
 
-/* 保持其他原有的playlist样式 */
-#playlist {
-    background-color: #f8f9fa;
-    padding: 15px;
-    padding-top: 0;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(108, 117, 125, 0.5) transparent;
-}
-
-.bg-secondary{
-    font-weight: 300;
-    color: var(--plyr-color-main);
-    background-color: rgb(78 224 95 / 20%) !important;
-    
-}
-#site-foot {
-   --tw-text-opacity:1;
-   color: rgb(107 114 128 / var(--tw-text-opacity));
-   font-size:.75rem;
-   margin-bottom: 2rem;
-}
 
 .plyr__control--overlaid {
     background-color: var(--plyr-color-main);
