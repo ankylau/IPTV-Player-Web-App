@@ -763,3 +763,8 @@ html, body {
         transform: translate(-50%, -50%) rotate(360deg); /* 旋转360度 */
     }
 }
+
+
+.lead{
+    font-size: 1.125rem;
+}
