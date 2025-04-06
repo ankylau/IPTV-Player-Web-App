@@ -683,6 +683,14 @@ html, body {
     margin-right: 0;
 }
 
+.lead {
+    font-size: 1.125rem;
+}
+
+.intro {
+   padding: 1.5rem 0.5rem 1.5rem 0.5rem !important;
+}
+
 /* 固定左侧栏 */
 .sidebar-column {
     position: fixed;
@@ -718,6 +726,10 @@ html, body {
         margin-left: 0;
         width: 100%;
     }
+
+     .mb-5{
+        margin-bottom:0!important;
+    }
 }
 
 /* 保持其他原有的playlist样式 */
@@ -729,6 +741,12 @@ html, body {
     scrollbar-color: rgba(108, 117, 125, 0.5) transparent;
 }
 
+.bg-secondary{
+    font-weight: 300;
+    color: var(--plyr-color-main);
+    background-color: rgb(78 224 95 / 20%) !important;
+    
+}
 #site-foot {
    --tw-text-opacity:1;
    color: rgb(107 114 128 / var(--tw-text-opacity));
@@ -773,6 +791,3 @@ html, body {
 }
 
 
-.lead{
-    font-size: 1.125rem;
-}
