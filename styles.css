@@ -1,6 +1,7 @@
 :root {
   --plyr-color-main: #1ac266;
   --plyr-video-control-background-hover:rgb(0 0 0 / 0%);
+  
 }
 
 html, body {
@@ -365,6 +366,9 @@ html, body {
     position: relative;
     height: 20px;
 }
+.progress, .progress-stacked{
+    --bs-progress-bar-bg: var(--plyr-color-main);
+}
 
 /* 进度条文字样式 */
 .progress-text {
@@ -379,23 +383,24 @@ html, body {
 /* 移除输入框聚焦时的阴影 */
 .form-control:focus {
     box-shadow: none;
-    border-color: #0582ff;
+    border-color: var(--plyr-color-main);
 }
 
 /* 按钮样式 */
 .btn-primary {
-    background-color: #212529;
-    border-color: #212529;
+    background-color: var(--plyr-color-main);
+    border-color: var(--plyr-color-main);
     min-width: 80px;
 }
 
 .btn-primary:hover,
-.btn-primary:focus,
-.btn-primary:active {
-    background-color: #000 !important;
-    border-color: #000 !important;
+.btn-primary:active,
+.btn-primary:focus {
+    background-color: #137466 !important;
+    border-color: #137466 !important;
     box-shadow: none !important;
 }
+
 
 /* 按钮禁用状态样式 */
 .btn-primary:disabled {
@@ -422,6 +427,9 @@ html, body {
     border-radius: 14px;
 }
 
+.plyr--video .plyr__control--overlaid:hover {
+    background:var(--plyr-color-main);
+}
 
 /* 直播标志样式 */
 .live-badge {
@@ -616,7 +624,7 @@ html, body {
 }
 
 .player-error .retry-btn:hover {
-    background-color: #c82333;
+    background-color: var(--plyr-color-main);
 }
 
 .player-error .retry-btn i {
