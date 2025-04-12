@@ -212,13 +212,14 @@
                     document.getElementById('welcomeSection').classList.remove('d-none');
                     console.error("Error loading the M3U file:", error);
                     // 显示错误信息给用户
-                    const errorMsg = document.createElement('div');
-                    errorMsg.className = 'alert alert-danger';
-                    errorMsg.textContent = `Loading failed: ${error.message}`;
-                    playlistItemsContainer.prepend(errorMsg);
+                    const errorMessage = document.getElementById('errorMessage');
+                    errorMessage.textContent = `Loading failed: ${error.message}`;
+                    errorMessage.classList.remove('d-none');
                     
                     // 3秒后移除错误信息
-                    setTimeout(() => errorMsg.remove(), 3000);
+                    setTimeout(() => {
+                        errorMessage.classList.add('d-none');
+                    }, 3000);
                 } finally {
                     loadM3UButton.disabled = false;
                     loadM3UButton.textContent = 'Go';
@@ -594,30 +595,27 @@
                     errorDiv.remove();
                 }, 30000);
             } else {
-                // 顶部Toast错误提示
-                const toast = document.createElement('div');
-                toast.className = 'error-toast';
-                toast.innerHTML = `
-                    <i class="fas fa-exclamation-circle"></i>
-                    <div class="error-message">${message}</div>
-                    <button class="close-btn">&times;</button>
-                `;
+                // 在输入框下方显示错误信息
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('d-none');
                 
-                document.body.appendChild(toast);
-                
-                // 关闭按钮点击事件
-                const closeBtn = toast.querySelector('.close-btn');
-                closeBtn.onclick = () => toast.remove();
-                
-                // 3秒后自动消失
-                setTimeout(() => toast.remove(), 3000);
+                // 3秒后自动隐藏错误信息
+                setTimeout(() => {
+                    errorMessage.classList.add('d-none');
+                }, 3000);
             }
         }
 
         // 修改清除错误信息函数
         function clearErrorMessage() {
-            document.querySelectorAll('.video-error-message, .error-toast, .player-error').forEach(el => el.remove());
+            // 清除播放器错误
+            document.querySelectorAll('.player-error').forEach(el => el.remove());
             document.querySelector('.player-container')?.classList.remove('has-error');
+            
+            // 清除输入框下方的错误信息
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.classList.add('d-none');
         }
 
         function parseM3U(content) {
