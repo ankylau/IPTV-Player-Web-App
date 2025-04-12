@@ -297,6 +297,8 @@ html, body {
     margin-top: 5px;
     font-size: 0.9rem;
     color: #6c757d;
+    word-wrap: break-word;
+    overflow-wrap: break-word; 
 }
 
 /* 移动端菜单按钮样式 */
