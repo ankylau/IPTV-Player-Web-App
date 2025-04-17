@@ -22,6 +22,21 @@
             }, delay);
         }
 
+        // 添加检查链接格式的函数
+        function isValidStreamUrl(url) {
+            // 移除URL中的查询参数
+            const baseUrl = url.split('?')[0].toLowerCase();
+            // 检查是否是M3U8链接（包括带查询参数的）
+            if (url.toLowerCase().includes('.m3u8')) {
+                return true;
+            }
+            // 检查是否是M3U链接
+            if (baseUrl.endsWith('.m3u')) {
+                return true;
+            }
+            return false;
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             const videoPlayer = document.getElementById("videoPlayer");
             const playlist = document.getElementById("playlist");
@@ -96,6 +111,11 @@
                 try {
                     loadM3UButton.disabled = true;
                     const m3uURL = m3uURLInput.value;
+                    
+                    // 检查链接格式
+                    if (!isValidStreamUrl(m3uURL)) {
+                        throw new Error('Only supports M3U and M3U8 format links');
+                    }
                     
                     // 隐藏欢迎区块
                     document.getElementById('welcomeSection').classList.add('d-none');
