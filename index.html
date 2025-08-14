@@ -7,9 +7,9 @@
     <meta name="keywords" content="M3U8 online playback, HLS playback,Open m3u file, M3U8 live streaming source, M3U8 online testing, M3U8 Play">
     <meta name="description" content="wtion.com is a browser tool that implements HTTP real-time streaming clients. You can play. m3u8 HTTP Live Streaming (HLS). It relies on HTML5 video and media source extensions for playback. Its working principle is to convert MPEG-2 transport stream and AAC/MP3 stream into ISO BMFF (MP4) segments.">
     <link rel="icon" type="image/png" href="icon.png">
-    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <link href="https://s4.zstatic.net/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://s4.zstatic.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://s4.zstatic.net/ajax/libs/plyr/3.7.8/plyr.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
@@ -141,14 +141,14 @@
     </div>
     <div id="billedMsg" class="billed-msg d-none"></div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.2/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://s4.zstatic.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://s4.zstatic.net/ajax/libs/bootstrap/5.3.7/js/bootstrap.min.js"></script>
+    <script src="https://s4.zstatic.net/ajax/libs/hls.js/1.6.9/hls.min.js"></script>
     <!-- 备用 CDN -->
     <script>
         if (typeof Hls === 'undefined') {
             const script = document.createElement('script');
-            script.src = 'https://unpkg.com/hls.js@latest';
+            script.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
             document.head.appendChild(script);
         }
     </script>
