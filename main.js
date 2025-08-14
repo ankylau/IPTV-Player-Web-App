@@ -37,6 +37,21 @@
             return false;
         }
 
+        // 检查 Hls.js 库是否加载
+        function checkHlsLibrary() {
+            if (typeof Hls === 'undefined') {
+                console.warn('Hls.js library not loaded');
+                // 显示用户友好的错误提示
+                const errorMessage = document.getElementById('errorMessage');
+                if (errorMessage) {
+                    errorMessage.textContent = 'HLS 播放库加载失败，请刷新页面重试';
+                    errorMessage.classList.remove('d-none');
+                }
+                return false;
+            }
+            return true;
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             const videoPlayer = document.getElementById("videoPlayer");
             const playlist = document.getElementById("playlist");
@@ -95,11 +110,13 @@
 
 
             // 创建 HLS 实例
-            if (Hls.isSupported()) {
+            if (checkHlsLibrary() && Hls.isSupported()) {
                 hls = new Hls({
                     maxBufferLength: 30,
                     maxMaxBufferLength: 60
                 });
+            } else {
+                console.warn('Hls.js library not loaded or not supported');
             }
 
             // 初始状态隐藏播放器和播放器容器
@@ -479,27 +496,26 @@
                     hls.destroy();
                 }
 
-                // 创建新的 HLS 实例，添加更多配置选项
-                hls = new Hls({
-                    maxBufferLength: 30,
-                    maxMaxBufferLength: 60,
-                    enableWorker: true,
-                    lowLatencyMode: true,
-                    backBufferLength: 90,
-                    // 修改 xhrSetup 配置
-                    xhrSetup: function(xhr, url) {
-                        xhr.withCredentials = false;
-                        // 保持原始URL，不做任何修改
-                        xhr.open('GET', url, true);
-                    },
-                    // 添加自定义加载器配置
-                    fragLoadingMaxRetry: 5,
-                    manifestLoadingMaxRetry: 5,
-                    levelLoadingMaxRetry: 5
-                });
-
                 // 使用 HLS.js 加载视频
-                if (Hls.isSupported()) {
+                if (checkHlsLibrary() && Hls.isSupported()) {
+                    // 创建新的 HLS 实例，添加更多配置选项
+                    hls = new Hls({
+                        maxBufferLength: 30,
+                        maxMaxBufferLength: 60,
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                        backBufferLength: 90,
+                        // 修改 xhrSetup 配置
+                        xhrSetup: function(xhr, url) {
+                            xhr.withCredentials = false;
+                            // 保持原始URL，不做任何修改
+                            xhr.open('GET', url, true);
+                        },
+                        // 添加自定义加载器配置
+                        fragLoadingMaxRetry: 5,
+                        manifestLoadingMaxRetry: 5,
+                        levelLoadingMaxRetry: 5
+                    });
                     console.log('Loading source:', item.source);
                     
                     hls.loadSource(item.source);
@@ -853,8 +869,15 @@
             document.querySelectorAll('.error-toast, .player-error').forEach(el => el.remove());
         }
 
-        // 页面卸载时清理
-        window.addEventListener('beforeunload', cleanupPlayer);
+                    // 页面卸载时清理
+            window.addEventListener('beforeunload', cleanupPlayer);
+
+            // 延迟检查 Hls 库是否加载成功
+            setTimeout(() => {
+                if (!checkHlsLibrary()) {
+                    console.warn('Hls.js library still not loaded after timeout');
+                }
+            }, 2000);
 
         // 添加 IntersectionObserver 初始化函数
         function initializeLazyLoading() {

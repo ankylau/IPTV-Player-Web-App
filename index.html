@@ -143,8 +143,15 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.2/js/bootstrap.min.js"></script>
-    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/hls.js/8.0.0-beta.3/hls.min.js"></script>
-    <!--script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script-->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <!-- 备用 CDN -->
+    <script>
+        if (typeof Hls === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/hls.js@latest';
+            document.head.appendChild(script);
+        }
+    </script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script src="main.js"></script>
     <script defer src="https://analytics.anky.cc/script.js" data-website-id="4af1b47d-ff77-45b0-a8dc-b8675cbcade7"></script>
